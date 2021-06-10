@@ -3,6 +3,8 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from helium import *
 from .objects import Experience, Education, Scraper, Interest, Accomplishment, Contact
 import os
@@ -145,23 +147,52 @@ class Person(Scraper):
         if len(about) > 0:
             data['About'].append(about[0])
 
-        # driver.execute_script(
-        #     "window.scrollTo(0, Math.ceil(document.body.scrollHeight/1.75));"
-        # )
 
-        # get experience
+        ################################################################################################################
+        # scroll to end in order to populate the html content
+        # driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
 
-        driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        # # get all the main cards        
+        # main_card_sections = find_all(S('.background-details > div > section > div > section'))
 
-        # driver.execute_script(
-        #     "window.scrollTo(0, Math.ceil(document.body.scrollHeight*2/5));"
-        # )
-        
-        # self._click_see_more_by_class_name("pv-profile-section__see-more-inline pv-profile-section__text-truncate-toggle artdeco-button artdeco-button--tertiary artdeco-button--muted")
+        # # scroll back up
+        # driver.execute_script('window.scrollTo(0, -document.body.scrollHeight);')
 
-        # if Button('more experiences').exists():
-        #     click(Button('more experiences'))
-        #     time.sleep(sleep_duration)
+        # for c in main_card_sections:
+        #     element = c.web_element
+        #     header = element.find_element_by_tag_name('header')
+        #     header_text = header.text
+        #     print(header_text) ## this should be your key
+
+        #     try:
+        #         button = element.find_element_by_xpath('./div/button')
+        #         ActionChains(driver).move_to_element(button).perform()
+        #         time.sleep(2)
+        #         button.click()
+        #     except NoSuchElementException:
+        #         pass    
+
+        #     entries = element.find_elements_by_xpath('./ul/li/section')
+        #     for e in entries:
+        #         if not len(e.find_elements_by_tag_names('li')):
+        #             print("no extension")
+        #             ## add the logic for entries without nested rows
+        #         else:
+        #             print("entry with extension")
+        #             # check for nested button
+        #             try:
+        #                 pass
+        #                 # try to expand if there are too many
+        #                 ## some nested element here, replace with the element
+        #                 # button = element.find_element_by_xpath('./div/button')
+        #                 # ActionChains(driver).move_to_element(button).perform()
+        #                 # time.sleep(2)
+        #                 # button.click()
+        #             except NoSuchElementException:
+        #                 pass   
+        #             ## then scrap the individual lists
+
+        ################################################################################################################
 
         exp = [cell.web_element.text for cell in find_all(S('span > div > section > div > section > ul > li > section', below='Experience', above='Education'))]
 
