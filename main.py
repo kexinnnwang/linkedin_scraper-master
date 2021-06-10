@@ -8,7 +8,6 @@ import time
 companies = pd.read_csv('founder_links.csv')
 
 links = companies['linkedin_profile_link'].tolist()
-
 column_name = ['Name','About', 'Title', 'Company Name', 'Link', 'Dates Employed', 
 'Employment Duration','School', 'Degree Name', 'Field Of Study', 'Dates attended or expected graduation', 'Language']
 
