@@ -20,8 +20,12 @@ actions.login(driver, email, password) # if email and password isnt given, it'll
 person = Person("https://www.linkedin.com/in/buzzandersen", driver=driver, close_on_complete=False)
 df = pd.DataFrame(dict([(k,pd.Series(v , dtype='object')) for k,v in person.data.items()]), columns = column_name)
 
+# test cases not working
 # https://www.linkedin.com/in/christopher-quek-li-wen/?originalSubdomain=sg
+# https://www.linkedin.com/in/huilinchin/
 
+
+# for linkedin data
 # data = []
 
 # for link in links:
