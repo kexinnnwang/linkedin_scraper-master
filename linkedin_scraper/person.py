@@ -146,145 +146,122 @@ class Person(Scraper):
         about = [cell.web_element.text for cell in find_all(S('div > div > div > section > div', below='About'))]
         if len(about) > 0:
             data['About'].append(about[0])
-
-
-        ################################################################################################################
         # scroll to end in order to populate the html content
-        # driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        time.sleep(4)
 
-        # # get all the main cards        
-        # main_card_sections = find_all(S('.background-details > div > section > div > section'))
+        # get all the main cards        
+        main_card_sections = find_all(S('.background-details > div > section > div > section'))
 
-        # # scroll back up
-        # driver.execute_script('window.scrollTo(0, -document.body.scrollHeight);')
+        # scroll back up
+        driver.execute_script('window.scrollTo(0, -document.body.scrollHeight);')
+        time.sleep(4)
 
-        # for c in main_card_sections:
-        #     element = c.web_element
-        #     header = element.find_element_by_tag_name('header')
-        #     header_text = header.text
-        #     print(header_text) ## this should be your key
+        #print(main_card_sections)
 
-        #     try:
-        #         button = element.find_element_by_xpath('./div/button')
-        #         ActionChains(driver).move_to_element(button).perform()
-        #         time.sleep(2)
-        #         button.click()
-        #     except NoSuchElementException:
-        #         pass    
+        for c in main_card_sections:
+            #print(c)
+            element = c.web_element
+            header = element.find_element_by_tag_name('header')
+            header_text = header.text
+            print(header_text) ## this should be your key
 
-        #     entries = element.find_elements_by_xpath('./ul/li/section')
-        #     for e in entries:
-        #         if not len(e.find_elements_by_tag_names('li')):
-        #             print("no extension")
-        #             ## add the logic for entries without nested rows
-        #         else:
-        #             print("entry with extension")
-        #             # check for nested button
-        #             try:
-        #                 pass
-        #                 # try to expand if there are too many
-        #                 ## some nested element here, replace with the element
-        #                 # button = element.find_element_by_xpath('./div/button')
-        #                 # ActionChains(driver).move_to_element(button).perform()
-        #                 # time.sleep(2)
-        #                 # button.click()
-        #             except NoSuchElementException:
-        #                 pass   
-        #             ## then scrap the individual lists
+            try:
+                button = element.find_element_by_xpath('./div/button')
+                ActionChains(driver).move_to_element(button).perform()
+                time.sleep(2)
+                button.click()
+            except NoSuchElementException:
+                pass 
 
-        ################################################################################################################
-
-        exp = [cell.web_element.text for cell in find_all(S('span > div > section > div > section > ul > li > section', below='Experience', above='Education'))]
-
-        exp_keys = ['Title', 'Company Name', 'Link', 'Dates Employed', 'Employment Duration']
-
-        for k in exp:
-            k = k.split('\n')
-            temp = []
-            for count in range(len(k)):
-                element = str(k[count])
-                if element in data.keys():
-                    temp.append(element)
-                    if element == 'Employment Duration':
-                        duration = k[count+1]
-                        data[element].append(self.get_duration_months(duration))
-                    elif element == 'Company Name':
-                        data[element].append(k[count+1])
-                        data['Link'].append(Link(k[0]).web_element.get_attribute('href'))
-                        temp.append('Link')
-                        if k.count('Title') > 1:
-                            data[element].append(k[count+1])
+            # get experience 
+            if header_text == 'Experience':
+                entries = element.find_elements_by_xpath('./ul/li/section')
+                exp_keys = ['Title', 'Company Name', 'Link', 'Dates Employed', 'Employment Duration']
+                all_entry = []
+                for e in entries:
+                    if not len(e.find_elements_by_tag_name('li')):
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
+        
                     else:
-                        data[element].append(k[count+1])
-                            
-                elif count == 0:
-                    data['Title'].append(element)
-                    temp.append('Title')
-            for key in exp_keys:
-                if key not in temp:
-                    data[key].append('None')
-
-        driver.execute_script(
-            "window.scrollTo(0, Math.ceil(document.body.scrollHeight/1.5));"
-        )
-
-        # get education
-        ## Click SEE MORE
-        # self._click_see_more_by_class_name("pv-education-section__see-more")
-        time.sleep(sleep_duration)
-
-        edu = [cell.web_element.text for cell in find_all(S('div > section > div > section > ul > li > div', below='Education'))]
-
-        edu_keys = ['School', 'Degree Name', 'Field Of Study', 'Dates attended or expected graduation']
-
-        for k in edu:
-            k = k.split('\n')
-            if self.have_common(k, edu_keys):
-                temp = []
-                for element in k:
-                    element = str(element)
-                    if element in data.keys():
-                        index = k.index(element)
-                        temp.append(element)
-                        data[element].append(k[index+1])
-                    elif k.index(element) == 0:
-                        data['School'].append(element)
-                        temp.append('School')
-                for key in edu_keys:
+                        print("entry with extension")
+                        # check for nested button
+                        try:
+                            button_exp = e.find_element_by_xpath('./div/button')
+                            ActionChains(driver).move_to_element(button_exp).perform()
+                            time.sleep(2)
+                            button_exp.click()
+                        except NoSuchElementException:
+                            pass   
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
+                        
+                # update experience into dictionary
+                for exp in all_entry:
+                    temp = []
+                    for count in range(len(exp)):
+                        text = str(exp[count])
+                        if text in data.keys():
+                            temp.append(text)
+                            if text == 'Employment Duration':
+                                duration = exp[count+1]
+                                data[text].append(self.get_duration_months(duration))
+                            elif text == 'Company Name':
+                                data[text].append(exp[count+1])
+                                data['Link'].append(Link(exp[0]).web_element.get_attribute('href'))
+                                temp.append('Link')
+                                if exp.count('Title') > 1:
+                                    data[text].extend(exp[count+1] for j in range(exp.count('Title') - 1))
+                            else:
+                                data[text].append(exp[count+1])                   
+                        elif count == 0:
+                            data['Title'].append(text)
+                            temp.append('Title')
+                for key in exp_keys:
                     if key not in temp:
                         data[key].append('None')
 
-        # element = [cell.web_element.text for cell in find_all(S('div > section > div > section > ul', below='Education'))]
+            # get education
+            elif header_text == 'Education':
+                entries = element.find_elements_by_xpath('./ul/li/div')
+                edu_keys = ['School', 'Degree Name', 'Field Of Study', 'Dates attended or expected graduation']
+                all_entry = []
+                for e in entries:
+                    if not len(e.find_elements_by_tag_name('li')):
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
+                    else:
+                        print("entry with extension")
+                        # check for nested button
+                        try:
+                            button_edu = e.find_elements_by_xpath('./div/button')
+                            for i in button_edu:
+                                ActionChains(driver).move_to_element(i).perform()
+                                time.sleep(2)
+                                i.click()
+                        except NoSuchElementException:
+                            pass   
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
 
-        # print(element)
-
-        # length = len([cell.web_element.text for cell in find_all(S('div > section > div > section > ul', below='Education'))][0].split('\n'))
-
-        # count = 0
-
-        # edu_keys = ['School', 'Degree Name', 'Field Of Study', 'Dates attended or expected graduation']
-
-        # for k in edu:
-        #     k = k.split('\n')
-        #     count += len(k)
-        #     temp = []
-        #     if count <= length:
-        #         for element in k:
-        #             element = str(element)
-        #             if element in data.keys():
-        #                 index = k.index(element)
-        #                 temp.append(element)
-        #                 data[element].append(k[index+1])
-        #             elif k.index(element) == 0:
-        #                 data['School'].append(element)
-        #                 temp.append('School')
-        #         for key in edu_keys:
-        #             if key not in temp:
-        #                 data[key].append('None')
-
-
+                for edu in all_entry:
+                    temp = []
+                    for i in edu :
+                        #i = str(i)
+                        if i in data.keys():
+                            index = edu.index(i)
+                            temp.append(i)
+                            data[i].append(edu [index+1])
+                        elif edu .index(i) == 0:
+                            data['School'].append(i)
+                            temp.append('School')
+                    for key in edu_keys:
+                        if key not in temp:
+                            data[key].append('None')
+        #print(data)
         #get language
-        button = [S('div > div > div > section > div > section > div > button > li-icon')]
+        #language = find_all(S('.background-details > div > section > div > section'))
         # if button:
         #     for i in button:
         #         click(i)
@@ -339,86 +316,111 @@ class Person(Scraper):
         if len(about) > 0:
             data['About'].append(about[0])
 
-        # driver.execute_script(
-        #     "window.scrollTo(0, Math.ceil(document.body.scrollHeight/1.75));"
-        # )
-
-        # get experience
-
+         # scroll to end in order to populate the html content
         driver.execute_script('window.scrollTo(0, document.body.scrollHeight);')
+        time.sleep(2)
 
-        # driver.execute_script(
-        #     "window.scrollTo(0, Math.ceil(document.body.scrollHeight*2/5));"
-        # )
+        # get all the main cards        
+        main_card_sections = find_all(S('.background-details > div > section > div > section'))
+
+        # scroll back up
+        driver.execute_script('window.scrollTo(0, -document.body.scrollHeight);')
+        time.sleep(2)
+
+        for c in main_card_sections:
+            element = c.web_element
+            header = element.find_element_by_tag_name('header')
+            header_text = header.text
+            print(header_text) ## this should be your key
+
+            # get experience 
+            if  header_text == 'Experience':
+                entries = element.find_elements_by_xpath('./ul/li/section')
+                exp_keys = ['Title', 'Company Name', 'Link', 'Dates Employed', 'Employment Duration']
+                all_entry = []
+                for e in entries:
+                    if not len(e.find_elements_by_tag_name('li')):
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
         
-        self._click_see_more_by_class_name("pv-profile-section__see-more-inline pv-profile-section__text-truncate-toggle artdeco-button artdeco-button--tertiary artdeco-button--muted")
-
-
-        # if Button('more experiences').exists():
-        #     click(Button('more experiences'))
-        #     time.sleep(sleep_duration)
-
-        exp = [cell.web_element.text for cell in find_all(S('span > div > section > div > section > ul > li > section', below='Experience', above='Education'))]
-
-        exp_keys = ['Title', 'Company Name', 'Link', 'Dates Employed', 'Employment Duration']
-
-        for k in exp:
-            k = k.split('\n')
-            temp = []
-            for count in range(len(k)):
-                element = str(k[count])
-                if element in data.keys():
-                    temp.append(element)
-                    if element == 'Employment Duration':
-                        duration = k[count+1]
-                        data[element].append(self.get_duration_months(duration))
-                    elif element == 'Company Name':
-                        data[element].append(k[count+1])
-                        data['Link'].append(Link(k[0]).web_element.get_attribute('href'))
-                        temp.append('Link')
-                        if k.count('Title') > 1:
-                            data[element].append(k[count+1])
                     else:
-                        data[element].append(k[count+1])
-                            
-                elif count == 0:
-                    data['Title'].append(element)
-                    temp.append('Title')
-            for key in exp_keys:
-                if key not in temp:
-                    data[key].append('None')
+                        print("entry with extension")
+                        # check for nested button
+                        try:
+                            button_exp = e.find_element_by_xpath('./div/button')
+                            ActionChains(driver).move_to_element(button_exp).perform()
+                            time.sleep(2)
+                            button_exp.click()
+                        except NoSuchElementException:
+                            pass   
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
+                        
+                # update experience into dictionary
+                for exp in all_entry:
+                    temp = []
+                    for count in range(len(exp)):
+                        text = str(exp[count])
+                        if text in data.keys():
+                            temp.append(text)
+                            if text == 'Employment Duration':
+                                duration = exp[count+1]
+                                data[text].append(self.get_duration_months(duration))
+                            elif text == 'Company Name':
+                                data[text].append(exp[count+1])
+                                data['Link'].append(Link(exp[0]).web_element.get_attribute('href'))
+                                temp.append('Link')
+                                if exp.count('Title') > 1:
+                                    data[text].extend(exp[count+1] for j in range(exp.count('Title') - 1))
+                            else:
+                                data[text].append(exp[count+1])                   
+                        elif count == 0:
+                            data['Title'].append(text)
+                            temp.append('Title')
+                for key in exp_keys:
+                    if key not in temp:
+                        data[key].append('None')
 
-        driver.execute_script(
-            "window.scrollTo(0, Math.ceil(document.body.scrollHeight/1.5));"
-        )
+            # get education
+            elif header_text == 'Education':
+                entries = element.find_elements_by_xpath('./ul/li/div')
+                edu_keys = ['School', 'Degree Name', 'Field Of Study', 'Dates attended or expected graduation']
+                all_entry = []
+                for e in entries:
+                    if not len(e.find_elements_by_tag_name('li')):
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
+                    else:
+                        print("entry with extension")
+                        # check for nested button
+                        try:
+                            button_edu = e.find_elements_by_xpath('./div/button')
+                            for i in button_edu:
+                                ActionChains(driver).move_to_element(i).perform()
+                                time.sleep(2)
+                                i.click()
+                        except NoSuchElementException:
+                            pass   
+                        k = e.text.strip().split('\n')
+                        all_entry.append(k)
 
-        # get education
-        ## Click SEE MORE
-        self._click_see_more_by_class_name("pv-education-section__see-more")
-        time.sleep(sleep_duration)
-
-        edu = [cell.web_element.text for cell in find_all(S('div > section > div > section > ul > li', below='Education'))]
-
-        edu_keys = ['School', 'Degree Name', 'Field Of Study', 'Dates attended or expected graduation']
-
-        for k in edu:
-            k = k.split('\n')
-            temp = []
-            for element in k:
-                element = str(element)
-                if element in data.keys():
-                    index = k.index(element)
-                    temp.append(element)
-                    data[element].append(k[index+1])
-                elif k.index(element) == 0:
-                    data['School'].append(element)
-                    temp.append('School')
-            for key in edu_keys:
-                if key not in temp:
-                    data[key].append('None')
-
+                for edu in all_entry:
+                    temp = []
+                    for i in edu :
+                        #i = str(i)
+                        if i in data.keys():
+                            index = edu.index(i)
+                            temp.append(i)
+                            data[i].append(edu [index+1])
+                        elif edu .index(i) == 0:
+                            data['School'].append(i)
+                            temp.append('School')
+                    for key in edu_keys:
+                        if key not in temp:
+                            data[key].append('None')
+        print(data)
         #get language
-        button = [S('div > div > div > section > div > section > div > button > li-icon')]
+        #language = find_all(S('.background-details > div > section > div > section'))
         # if button:
         #     for i in button:
         #         click(i)

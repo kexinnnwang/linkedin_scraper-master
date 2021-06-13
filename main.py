@@ -13,22 +13,23 @@ column_name = ['Name','About', 'Title', 'Company Name', 'Link', 'Dates Employed'
 
 driver = start_chrome()
 
-email = "mlvc9733@gmail.com"
-password = "Ml9733vc!"
+email = "mlvc9892@hotmail.com"
+password = "Mlvc9892!"
 actions.login(driver, email, password) # if email and password isnt given, it'll prompt in terminal
 
-# person = Person("https://www.linkedin.com/in/buzzandersen", driver=driver, close_on_complete=False)
-# df = pd.DataFrame(dict([(k,pd.Series(v , dtype='object')) for k,v in person.data.items() ]), columns = column_name)
+person = Person("https://www.linkedin.com/in/buzzandersen", driver=driver, close_on_complete=False)
+df = pd.DataFrame(dict([(k,pd.Series(v , dtype='object')) for k,v in person.data.items()]), columns = column_name)
 
-data = []
+# https://www.linkedin.com/in/christopher-quek-li-wen/?originalSubdomain=sg
 
-for link in links:
-    if link != 'nil':
-        person = Person(link, driver=driver, close_on_complete=False)
-        output = pd.DataFrame(dict([(k,pd.Series(v, dtype='object')) for k,v in person.data.items() ]), columns = column_name)
-        data.append(output)
-        time.sleep(2)
+# data = []
 
-df = pd.concat(data)
+# for link in links:
+#     if link != 'nil':
+#         person = Person(link, driver=driver, close_on_complete=False)
+#         output = pd.DataFrame(dict([(k, pd.Series(v, dtype='object')) for k,v in person.data.items()]), columns = column_name)
+#         data.append(output)
+
+# df = pd.concat(data)
 
 df.to_csv('linkedin_data.csv', index=False)

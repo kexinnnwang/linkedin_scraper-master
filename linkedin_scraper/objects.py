@@ -132,9 +132,9 @@ class Scraper(object):
 
     def is_signed_in(self):
         try:
-            _ = WebDriverWait(self.driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
-                EC.presence_of_element_located((By.ID, c.VERIFY_LOGIN_ID))
-            )
+            # _ = WebDriverWait(self.driver, self.__WAIT_FOR_ELEMENT_TIMEOUT).until(
+            #     EC.presence_of_element_located((By.ID, c.VERIFY_LOGIN_ID))
+            # )
             #self.driver.find_element_by_id(c.VERIFY_LOGIN_ID)
             return True
         except:
